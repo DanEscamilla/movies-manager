@@ -1,4 +1,4 @@
-
+const bodyParser = require('body-parser');
 var api = (function(){
 
   let app;
@@ -7,8 +7,33 @@ var api = (function(){
   var start = function(express,db){
     app = express;
 
+
+    app.use(bodyParser.json());
     app.get('/api/movies',function(req,res){
       db.movie.findAll().then((results)=>{
+        res.send(results);
+      });
+    });
+
+    app.put('/api/update/movie/:id',function(req,res){
+      let query={
+        where:{
+          id:req.params.id
+        }
+      }
+      db.movie.update(req.body,query).then((results)=>{
+        res.send(results);
+      });
+    });
+
+
+    app.get('/api/movie/:id',function(req,res){
+      let query={
+        where:{
+          id:req.params.id
+        }
+      }
+      db.movie.findAll(query).then((results)=>{
         res.send(results);
       });
     });

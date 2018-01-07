@@ -1,7 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
 
-  var movie = sequelize.define('movie', {
+  let movie = sequelize.define('movie', {
     name:{
       type: DataTypes.STRING,
       allowNull:false
@@ -16,14 +16,11 @@ module.exports = (sequelize, DataTypes) => {
     rating:DataTypes.FLOAT,
     imdbid:DataTypes.STRING,
     filename:DataTypes.STRING
-  }, {
-    classMethods: {
-      associate: function(models) {
-        models.movie.belongsToMany(models.genre,{
-          through:'genre_movie'
-        });
-      }
-    }
   });
+  movie.associate= function(models) {
+    movie.belongsToMany(models.genre,{
+      through:'genre_movie'
+    });
+  };
   return movie;
 };
