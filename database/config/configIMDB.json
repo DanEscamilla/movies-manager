@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "movie_categorizer_app",
+    "password": "password",
+    "database": "movie_categorizer",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "movie_categorizer_app",
+    "password": "password",
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "movie_categorizer_app",
+    "password": "password",
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
