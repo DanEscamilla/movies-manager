@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     rating:DataTypes.FLOAT,
     imdbid:DataTypes.STRING,
-    filename:DataTypes.STRING
+    filename:DataTypes.STRING,
+    lastPlayTime:DataTypes.FLOAT
   });
   movie.associate= function(models) {
     movie.belongsToMany(models.genre,{

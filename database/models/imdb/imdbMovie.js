@@ -17,13 +17,13 @@ module.exports = (sequelize, DataTypes) => {
     rating:DataTypes.FLOAT
   }, {
     timestamps:false,
-    classMethods: {
-      associate: function(models) {
-        models.imdbMovie.belongsToMany(models.genre,{
-          through:'genre_movie'
-        });
-      }
-    }
   });
+
+  imdbMovie.associate= function(models) {
+    imdbMovie.belongsToMany(models.genre,{
+      through:'genre_movie'
+    });
+  }
+
   return imdbMovie;
 };

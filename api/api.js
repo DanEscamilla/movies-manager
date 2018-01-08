@@ -1,4 +1,5 @@
 const bodyParser = require('body-parser');
+
 var api = (function(){
 
   let app;
@@ -15,15 +16,19 @@ var api = (function(){
       });
     });
 
-    app.put('/api/update/movie/:id',function(req,res){
+    app.put('/api/movies/:id',function(req,res){
       let query={
         where:{
           id:req.params.id
         }
       }
-      db.movie.update(req.body,query).then((results)=>{
-        res.send(results);
-      });
+      // db.movie.build(req.body).save().then((dbRes)=>{
+      //   console.log(dbRes);
+      //   res.send("ok");
+      // });
+      // db.movie.update(req.body,query).then((results)=>{
+      //   res.send(results);
+      // });
     });
 
 
