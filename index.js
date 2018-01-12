@@ -14,10 +14,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/public',express.static("/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies/"));
 app.use(function(req, res, next) {
-res.header("Access-Control-Allow-Origin", "*");
-res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-res.header("Access-Control-Allow-Methods", "POST,GET,PUT");
-next();
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "POST,GET,PUT");
+  next();
 });
 
 server = http.createServer(app);
@@ -30,9 +30,17 @@ epilogue.initialize({
 var userResource = epilogue.resource({
   model: localDB.movie,
   endpoints: ['/api/movies', '/api/movies/:id'],
+  excludeAttributes:['createdAt','updatedAt'],
+  sort: {
+      default: '-updatedAt'
+    }
+
+});
+var genreResource = epilogue.resource({
+  model: localDB.genre,
+  endpoints: ['/api/genres', '/api/genres/:id'],
   excludeAttributes:['createdAt','updatedAt' ]
 });
-
 // app.get('/',function(req,res){
 //   res.sendFile(indexFile);
 // });
