@@ -27,23 +27,58 @@ epilogue.initialize({
   sequelize:localDB.sequelize
 });
 
-var userResource = epilogue.resource({
+let testMiddleware={
+  list:{
+    start:{
+      action:function(req,res,context){
+        if (req.query){
+
+          if (req.query.genreId){
+            this.include.forEach((include)=>{
+              if (include.model.name == 'genre'){
+                include.where = {id:req.query.genreId};
+              }
+            });
+          }
+        }
+        return context.continue
+      }
+    },
+    complete: {
+      action: function(req, res, context) {
+        // we have to clean up every include.where after the request,
+        // or we will have the same filters on the next request
+        this.include.forEach((include)=>{
+          delete include.where;
+        });
+        return context.continue();
+      }
+    }
+  }
+};
+
+
+let movieResource = epilogue.resource({
   model: localDB.movie,
   endpoints: ['/api/movies', '/api/movies/:id'],
   excludeAttributes:['createdAt','updatedAt'],
-  sort: {
-      default: '-updatedAt'
-    }
-
+  // sort: {
+  //     default: '-updatedAt'
+  //   }
+  include:[{
+    model:localDB.genre,
+    attributes:[]
+  }]
 });
-var genreResource = epilogue.resource({
+
+movieResource.use(testMiddleware);
+
+let genreResource = epilogue.resource({
   model: localDB.genre,
   endpoints: ['/api/genres', '/api/genres/:id'],
   excludeAttributes:['createdAt','updatedAt' ]
 });
-// app.get('/',function(req,res){
-//   res.sendFile(indexFile);
-// });
+
 localDB.sequelize.sync().then(()=>{
     // api.start(app,localDB);
 
