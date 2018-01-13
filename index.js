@@ -4,10 +4,7 @@ var path = require('path');
 let api = require('./api/api');
 var localDB = require('./database/models/local/index');
 var http = require('http');
-var epilogue = require('epilogue');
-// initialize the server
 var app = express();
-var server;
 var bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
@@ -20,70 +17,44 @@ app.use(function(req, res, next) {
   next();
 });
 
-server = http.createServer(app);
+var server = http.createServer(app);
+api.init(app,localDB.sequelize);
 
-epilogue.initialize({
-  app:app,
-  sequelize:localDB.sequelize
-});
-
-let testMiddleware={
-  list:{
-    start:{
-      action:function(req,res,context){
-        if (req.query){
-
-          if (req.query.genreId){
-            this.include.forEach((include)=>{
-              if (include.model.name == 'genre'){
-                include.where = {id:req.query.genreId};
-              }
-            });
-          }
-        }
-        return context.continue
-      }
-    },
-    complete: {
-      action: function(req, res, context) {
-        // we have to clean up every include.where after the request,
-        // or we will have the same filters on the next request
-        this.include.forEach((include)=>{
-          delete include.where;
-        });
-        return context.continue();
-      }
-    }
-  }
-};
-
-
-let movieResource = epilogue.resource({
+api.createResource({
   model: localDB.movie,
-  endpoints: ['/api/movies', '/api/movies/:id'],
+  endpoint: '/api/movies/',
   excludeAttributes:['createdAt','updatedAt'],
-  // sort: {
-  //     default: '-updatedAt'
-  //   }
   include:[{
     model:localDB.genre,
     attributes:[]
   }]
-});
-
-movieResource.use(testMiddleware);
-
-let genreResource = epilogue.resource({
+})
+api.createResource({
   model: localDB.genre,
-  endpoints: ['/api/genres', '/api/genres/:id'],
-  excludeAttributes:['createdAt','updatedAt' ]
-});
+  endpoint: '/api/genres/',
+  attributes:['name'],
+  excludeAttributes:['createdAt','updatedAt']
+})
 
 localDB.sequelize.sync().then(()=>{
-    // api.start(app,localDB);
 
+    // let query = {
+    //   group : ["movie.name"],
+    //   having : ['COUNT(distinct `genres`.`id`) = ?', 2],
+    //   attributes:["name"],
+    //   include:[{
+    //     model:localDB.genre,
+    //     required:true,
+    //     attributes:[],
+    //     where:{id:['2','3']},
+    //   }]
+    // }
+    // localDB.movie.findAndCountAll(query).then((row)=>{
+    //   let arr;
+    //   console.log(row.count);
+    // })
 
-    server.listen(3000,function(){
+    server.listen(3001,function(){
       console.log("corriendo!");
     });
 
