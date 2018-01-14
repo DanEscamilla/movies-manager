@@ -40,9 +40,9 @@ var resourceCreator = (function(){
   let getOrderingArray = (arrParams)=>{
     return arrParams.map((param)=>{
       if (param.charAt(0)=="-"){
-        return [sequelize.fn('max', sequelize.col(param)), 'DESC'];
+        return [param.substring(1,param.length), 'DESC'];
       }
-      return [sequelize.fn('max',  sequelize.col(param))];
+      return [param,'ASC'];
     });
   };
   let normalizeOptions = (options)=>{

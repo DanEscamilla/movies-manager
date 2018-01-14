@@ -2,10 +2,8 @@ var express = require('express');
 var queryCreator = require('./queryCreator');
 
 var resourceCreator = (function(){
-  let sequelize;
 
   let init = (seq)=>{
-    sequelize = seq;
     queryCreator.init(seq);
   }
 
@@ -65,9 +63,7 @@ var resourceCreator = (function(){
       let obj = beforeData(req,res,resource.list,options);
       let model = obj.model;
       let query = obj.query;
-      console.log(query);
       model.findAll(query).then((results)=>{
-        console.log("NOPE...");
         afterData(req,res,resource.list,results);
       });
     });
@@ -84,6 +80,19 @@ var resourceCreator = (function(){
             afterData(req,res,resource.read,result);
           });
       })
+    });
+    router.put('/:movie',function(req,res){
+        let model = options.model;
+        let query = {where:{}};
+        model.describe().then(function (schema) {
+            let PK = Object.keys(schema).filter(function(field){
+                return schema[field].primaryKey;
+            });
+            query.where[PK] = req.params.movie;
+            model.update(req.body,query).then((result)=>{
+              afterData(req,res,resource.update,result);
+            });
+        })
     });
 
     return router;

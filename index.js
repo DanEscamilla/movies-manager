@@ -25,6 +25,7 @@ var movieResource = api.createResource({
   model: localDB.movie,
   endpoint: '/api/movies/',
   excludeAttributes:['createdAt','updatedAt'],
+  order:['-updatedAt'],
 });
 
 var genreResource = api.createResource({
