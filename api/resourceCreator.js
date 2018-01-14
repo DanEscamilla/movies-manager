@@ -36,13 +36,13 @@ var resourceCreator = (function(){
   let beforeData = (req,res,hook,options)=>{
 
       if (hook.start){
-          hook.start(req,res,query);
+          hook.start(req,res,{});
       }
 
       let obj=queryCreator.fabricateQuery(req,options)
 
       if (hook.before){
-          hook.before(req,res,query);
+          hook.before(req,res,obj.query);
       }
       return obj;
   }
@@ -65,7 +65,9 @@ var resourceCreator = (function(){
       let obj = beforeData(req,res,resource.list,options);
       let model = obj.model;
       let query = obj.query;
+      console.log(query);
       model.findAll(query).then((results)=>{
+        console.log("NOPE...");
         afterData(req,res,resource.list,results);
       });
     });

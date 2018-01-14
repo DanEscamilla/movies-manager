@@ -25,33 +25,49 @@ var movieResource = api.createResource({
   model: localDB.movie,
   endpoint: '/api/movies/',
   excludeAttributes:['createdAt','updatedAt'],
-  include:[{
-    model:localDB.genre,
-    attributes:[]
-  }]
 });
 
 var genreResource = api.createResource({
   model: localDB.genre,
   endpoint: '/api/genres/',
-  attributes:['name'],
   excludeAttributes:['createdAt','updatedAt']
 });
 
 app.use('/api/movies/',movieResource.router);
 app.use('/api/genres/',genreResource.router);
 
-localDB.sequelize.sync().then(()=>{
+movieResource.list.before=function(req,res,query){
+  if (req.query.genreId){
+    if (!Array.isArray(req.query.genreId)){
+      req.query.genreId = [req.query.genreId];
+    }
+    query.group=["movie.name"];
+    query.having= localDB.sequelize.literal('COUNT(distinct `genres`.`id`) = '+req.query.genreId.length);
+    query.include.push({
+      model:localDB.genre,
+      required:true,
+      attributes:[],
+      where:{id:req.query.genreId},
+      duplicating:false,
+    });
+  }
+}
 
+localDB.sequelize.sync().then(()=>{
+    // let num = 2;
     // let query = {
     //   group : ["movie.name"],
-    //   having : ['COUNT(distinct `genres`.`id`) = ?', 2],
+    //   having : localDB.sequelize.literal('COUNT(distinct `genres`.`id`) = '+num),
+    //   offset:0,
+    //   limit:30,
+    //   // raw:true,
     //   attributes:["name"],
     //   include:[{
     //     model:localDB.genre,
     //     required:true,
     //     attributes:[],
     //     where:{id:['2','3']},
+    //     duplicating:false,
     //   }]
     // }
     // localDB.movie.findAndCountAll(query).then((row)=>{

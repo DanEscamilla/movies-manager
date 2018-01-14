@@ -1,11 +1,10 @@
 var path = require('path');
-
 var resourceCreator = (function(){
   let sequelize;
 
   let init = (seq)=>{
     sequelize = seq;
-  }
+  };
   let buildQSearch = (attributes,value)=>{
     let qCondition= {$or:[]};
     attributes.forEach((attr)=>{
@@ -15,7 +14,7 @@ var resourceCreator = (function(){
       qCondition.$or.push(attributeLike);
     });
     return qCondition;
-  }
+  };
   let findSearchOption = (key,searchOptions)=>{
     if (searchOptions){
       for (let i=0;i<searchOptions.length;i++){
@@ -25,7 +24,7 @@ var resourceCreator = (function(){
       }
     }
     return null;
-  }
+  };
 
   let appendSearchOption = (where,options,value)=>{
     let attributes = options.attributes||[];
@@ -36,7 +35,7 @@ var resourceCreator = (function(){
       obj[attr][operator]=value;
       where.$and.push(obj);
     });
-  }
+  };
 
   let getOrderingArray = (arrParams)=>{
     return arrParams.map((param)=>{
@@ -45,7 +44,7 @@ var resourceCreator = (function(){
       }
       return [sequelize.fn('max',  sequelize.col(param))];
     });
-  }
+  };
   let normalizeOptions = (options)=>{
     options.attributes = options.attributes ||getAttributesArray(options.model);
     if (options.excludeAttributes){
@@ -60,18 +59,22 @@ var resourceCreator = (function(){
     options.order=((options.order)?getOrderingArray(options.order):undefined);
   };
 
+  let makeArray = (variable)=>{
+    return ((variable)?((Array.isArray(variable))?variable:[variable]):[]);
+  };
+
   let initQuery = (options)=>{
     let obj ={
       attributes: options.attributes,
       order:options.order,
       where:{
         $and:[]
-      }
+      },
     }
     obj = JSON.parse(JSON.stringify(obj));
-    obj.include=((!options.include===Array)?[options.include]:options.include);
+    obj.include=makeArray(options.include);
     return obj;
-  }
+  };
 
   let getAttributesArray = (model)=>{
     let arr =[];
@@ -79,10 +82,10 @@ var resourceCreator = (function(){
       arr.push(key);
     })
     return arr;
-  }
+  };
   let endpointById = (endpoint)=>{
     return path.normalize(endpoint)+":id"
-  }
+  };
   let fabricateQuery = (req,options)=>{
     let query = initQuery(options);
     let page,count,scope,model=options.model;
@@ -110,12 +113,9 @@ var resourceCreator = (function(){
           return;
         break;
       }
-      console.log(key);
       let searchOption = findSearchOption(key,options.search);
       if (searchOption){
         appendSearchOption(query.where,searchOption,value);
-      } else {
-        appendSearchOption(query.where,{attributes:[key]},value);
       }
     });
     if (page!=null){
@@ -127,7 +127,7 @@ var resourceCreator = (function(){
       model = model.scope(scope);
     }
     return {query:query,model:model};
-  }
+  };
 
   return {
 		init:init,
