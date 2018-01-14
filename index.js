@@ -18,9 +18,10 @@ app.use(function(req, res, next) {
 });
 
 var server = http.createServer(app);
+
 api.init(app,localDB.sequelize);
 
-api.createResource({
+var movieResource = api.createResource({
   model: localDB.movie,
   endpoint: '/api/movies/',
   excludeAttributes:['createdAt','updatedAt'],
@@ -28,13 +29,17 @@ api.createResource({
     model:localDB.genre,
     attributes:[]
   }]
-})
-api.createResource({
+});
+
+var genreResource = api.createResource({
   model: localDB.genre,
   endpoint: '/api/genres/',
   attributes:['name'],
   excludeAttributes:['createdAt','updatedAt']
-})
+});
+
+app.use('/api/movies/',movieResource.router);
+app.use('/api/genres/',genreResource.router);
 
 localDB.sequelize.sync().then(()=>{
 
@@ -54,7 +59,7 @@ localDB.sequelize.sync().then(()=>{
     //   console.log(row.count);
     // })
 
-    server.listen(3001,function(){
+    server.listen(3000,function(){
       console.log("corriendo!");
     });
 

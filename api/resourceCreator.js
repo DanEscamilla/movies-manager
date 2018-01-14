@@ -1,167 +1,95 @@
-var path = require('path');
+var express = require('express');
+var queryCreator = require('./queryCreator');
 
 var resourceCreator = (function(){
-  let app;
   let sequelize;
 
-  let init = (seq,a)=>{
-    app = a;
+  let init = (seq)=>{
     sequelize = seq;
-  }
-  let buildQSearch = (attributes,value)=>{
-    let qCondition= {$or:[]};
-    attributes.forEach((attr)=>{
-      let attributeLike = {}
-      attributeLike[attr]={}
-      attributeLike[attr].$like='%'+value+'%';
-      qCondition.$or.push(attributeLike);
-    });
-    return qCondition;
-  }
-  let findSearchOption = (key,searchOptions)=>{
-    for (let i=0;i<searchOption.length;i++){
-      if (key==searchOption[i].param){
-        return searchOption[i];
-      }
-    }
-    return null;
+    queryCreator.init(seq);
   }
 
-  let appendSearchOption = (where,options,value)=>{
-    let attributes = options.attributes||[];
-    let operator = options.operator||'%eq';
-    attributes.forEach((attr)=>{
-      let obj = {}
-      obj[attr]={}
-      obj[attr][operator]=value;
-      where.$and.push(obj);
-    });
-  }
-
-  let getOrderingArray = (arrParams)=>{
-    return arrParams.map((param)=>{
-      if (param.charAt(0)=="-"){
-        return [sequelize.fn('max', sequelize.col(param)), 'DESC'];
-      }
-      return [sequelize.fn('max',  sequelize.col(param))];
-    });
-  }
-  let normalizeOptions = (options)=>{
-    options.attributes = options.attributes ||getAttributesArray(options.model);
-    if (options.excludeAttributes){
-      options.excludeAttributes.forEach((attr)=>{
-        let index = options.attributes.indexOf(attr)
-        if (index>=0){
-          options.attributes.splice(index,1);
-        }
-      })
+  let createHooks = ()=>{
+    return {
+      start:null,
+      before:null,
+      data:null,
+      sent:null,
     }
-
-    options.order=((options.order)?getOrderingArray(options.order):undefined);
-  };
-
-  let initQuery = (options)=>{
-    let obj ={
-      attributes: options.attributes,
-      order:options.order,
-      where:{
-        $and:[]
-      }
-    }
-    obj = JSON.parse(JSON.stringify(obj));
-    obj.include=((!options.include===Array)?[options.include]:options.include);
-    return obj;
-  }
-
-  let getAttributesArray = (model)=>{
-    let arr =[];
-    Object.keys(model.rawAttributes).forEach((key)=>{
-      arr.push(key);
-    })
-    return arr;
-  }
-  let endpointById = (endpoint)=>{
-    return path.normalize(endpoint)+":id"
-  }
-  let fabricateQuery = (req,options)=>{
-    let query = initQuery(options);
-    let page,perPage,scope,model=options.model;
-    Object.keys(req.query).forEach(function(key,index) {
-      let value =req.query[key];
-      switch(key){
-        case 'q':
-          query.where.$and.push(buildQSearch(options.attributes,value));
-          return;
-        break;
-        case 'order':
-          query.order = getOrderingArray(value);
-          return;
-        break;
-        case 'page':
-          page=parseInt(value);
-          return;
-        break;
-        case 'perPage':
-          perPage=parseInt(value);
-          return;
-        break;
-        case 'scope':
-          scope=value;
-          return;
-        break;
-      }
-      let searchOption = findSearchOption(key);
-      if (searchOption){
-        appendSearchOption(query.where,searchOption,value);
-      } else {
-        appendSearchOption(query.where,{attributes:[key]},value);
-      }
-    });
-    if (page!=null){
-      perPage = perPage||50;
-      query.offset = page*perPage;
-      query.limit = perPage;
-    }
-    if (scope){
-      model = model.scope(scope);
-    }
-    return {query:query,model:model};
   }
 
   let createResource = (options)=>{
-    // console.log(options);
-    normalizeOptions(options);
+    var resource = {
+      delete:createHooks(),
+      create:createHooks(),
+      list:createHooks(),
+      read:createHooks(),
+      update:createHooks(),
+      router:null,
+      endpoint:options.endpoint,
+    };
+    resource.router = createRouter(options,resource);
 
-    app.get(options.endpoint,function(req,res){
-      let obj=fabricateQuery(req,options)
+    return resource;
+  }
+
+  let beforeData = (req,res,hook,options)=>{
+
+      if (hook.start){
+          hook.start(req,res,query);
+      }
+
+      let obj=queryCreator.fabricateQuery(req,options)
+
+      if (hook.before){
+          hook.before(req,res,query);
+      }
+      return obj;
+  }
+  let afterData = (req,res,hook,results)=>{
+      if (hook.data){
+        hook.data(req,res,results);
+      }
+      res.send(results);
+      if (hook.sent){
+        hook.sent(req,res,results);
+      }
+  }
+
+  let createRouter = (options,resource)=>{
+    queryCreator.normalizeOptions(options);
+
+    let router = express.Router({ mergeParams:true});
+
+    router.get('/',function(req,res){
+      let obj = beforeData(req,res,resource.list,options);
       let model = obj.model;
       let query = obj.query;
       model.findAll(query).then((results)=>{
-        res.send(results);
+        afterData(req,res,resource.list,results);
       });
     });
-    app.get(endpointById(options.endpoint),function(req,res){
-
-      let obj=fabricateQuery(req,options)
+    router.get('/:movie',function(req,res){
+      let obj = beforeData(req,res,resource.read,options);
       let model = obj.model;
       let query = obj.query;
-
       model.describe().then(function (schema) {
           let PK = Object.keys(schema).filter(function(field){
               return schema[field].primaryKey;
           });
-          query.where[PK] = req.params.id;
-
+          query.where[PK] = req.params.movie;
           model.findOne(query).then((result)=>{
-            res.send(result);
+            afterData(req,res,resource.read,result);
           });
       })
-
     });
+
+    return router;
   }
+
   return {
 		init:init,
-    createResource:createResource
+    createResource:createResource,
 	};
 
 })();
