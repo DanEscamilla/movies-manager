@@ -28,7 +28,7 @@ var resourceCreator = (function(){
 
   let appendSearchOption = (where,options,value)=>{
     let attributes = options.attributes||[];
-    let operator = options.operator||'%eq';
+    let operator = options.operator||'$eq';
     attributes.forEach((attr)=>{
       let obj = {}
       obj[attr]={}
@@ -121,7 +121,7 @@ var resourceCreator = (function(){
     if (page!=null){
       count = count||50;
       query.offset = page*count;
-      query.limit = count;
+      query.limit = (page+1)*count;
     }
     if (scope){
       model = model.scope(scope);

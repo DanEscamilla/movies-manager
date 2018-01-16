@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   genre.associate= function(models) {
     genre.belongsToMany(models.movie,{
-      through:'genre_movie'
+      through:'movie_genre'
     });
     genre.addScope('relevant',{
       include:[{

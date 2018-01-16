@@ -5,7 +5,10 @@
     "database": "database_development",
     "host": "localhost",
     "dialect": "sqlite",
-    "storage":"./database/my-movies-db.db"
+    "storage":"./database/my-movies-db.db",
+    "pool":{
+      "max":100
+    }
   },
   "test": {
     "username": "root",

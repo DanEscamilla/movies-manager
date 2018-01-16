@@ -8,20 +8,29 @@ module.exports = (sequelize, DataTypes) => {
     },
     duration:DataTypes.INTEGER,
     year:DataTypes.INTEGER,
-    seen:DataTypes.BOOLEAN,
+    status:{
+      type:DataTypes.ENUM('IN-PROGRESS','NEW','FINISHED','UNSEEN'),
+      defaultValue:'NEW'
+    },
     path:{
       type:DataTypes.TEXT,
       allowNull:false
     },
     rating:DataTypes.FLOAT,
-    imdbid:DataTypes.STRING,
+    imdbId:DataTypes.STRING,
     filename:DataTypes.STRING,
-    lastPlayTime:DataTypes.FLOAT
+    lastPlayTime:{
+      type:DataTypes.FLOAT,
+      defaultValue: 0
+    },
+    lastSeenDate:{
+      type:DataTypes.DATE
+    }
   });
 
   movie.associate = function(models) {
     movie.belongsToMany(models.genre,{
-      through:'genre_movie'
+      through:'movie_genre'
     });
   };
   return movie;

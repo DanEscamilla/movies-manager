@@ -67,7 +67,7 @@ var resourceCreator = (function(){
         afterData(req,res,resource.list,results);
       });
     });
-    router.get('/:movie',function(req,res){
+    router.get('/:id',function(req,res){
       let obj = beforeData(req,res,resource.read,options);
       let model = obj.model;
       let query = obj.query;
@@ -75,20 +75,20 @@ var resourceCreator = (function(){
           let PK = Object.keys(schema).filter(function(field){
               return schema[field].primaryKey;
           });
-          query.where[PK] = req.params.movie;
+          query.where[PK] = req.params.id;
           model.findOne(query).then((result)=>{
             afterData(req,res,resource.read,result);
           });
       })
     });
-    router.put('/:movie',function(req,res){
+    router.put('/:id',function(req,res){
         let model = options.model;
         let query = {where:{}};
         model.describe().then(function (schema) {
             let PK = Object.keys(schema).filter(function(field){
                 return schema[field].primaryKey;
             });
-            query.where[PK] = req.params.movie;
+            query.where[PK] = req.params.id;
             model.update(req.body,query).then((result)=>{
               afterData(req,res,resource.update,result);
             });

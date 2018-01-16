@@ -6,6 +6,7 @@ var localDB = require('./database/models/local/index');
 var http = require('http');
 var app = express();
 var bodyParser = require('body-parser');
+var moviesFinder = require('./moviesFinder');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -55,26 +56,7 @@ movieResource.list.before=function(req,res,query){
 }
 
 localDB.sequelize.sync().then(()=>{
-    // let num = 2;
-    // let query = {
-    //   group : ["movie.name"],
-    //   having : localDB.sequelize.literal('COUNT(distinct `genres`.`id`) = '+num),
-    //   offset:0,
-    //   limit:30,
-    //   // raw:true,
-    //   attributes:["name"],
-    //   include:[{
-    //     model:localDB.genre,
-    //     required:true,
-    //     attributes:[],
-    //     where:{id:['2','3']},
-    //     duplicating:false,
-    //   }]
-    // }
-    // localDB.movie.findAndCountAll(query).then((row)=>{
-    //   let arr;
-    //   console.log(row.count);
-    // })
+    moviesFinder.findMovies(localDB);
 
     server.listen(3000,function(){
       console.log("corriendo!");
