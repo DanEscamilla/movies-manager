@@ -24,18 +24,21 @@ api.init(app,localDB.sequelize);
 
 var movieResource = api.createResource({
   model: localDB.movie,
-  endpoint: '/api/movies/',
   excludeAttributes:['createdAt','updatedAt'],
   order:['-updatedAt'],
 });
-
+var collectionResource = api.createResource({
+  model: localDB.collection,
+  excludeAttributes:['createdAt','updatedAt'],
+  order:['-updatedAt'],
+});
 var genreResource = api.createResource({
   model: localDB.genre,
-  endpoint: '/api/genres/',
   excludeAttributes:['createdAt','updatedAt']
 });
 
-app.use('/api/movies/',movieResource.router);
+app.use('/api/collections/',collectionResource.router);
+app.use('/api/collections/:collectionId/',movieResource.router)
 app.use('/api/genres/',genreResource.router);
 
 movieResource.list.before=function(req,res,query){
@@ -56,9 +59,9 @@ movieResource.list.before=function(req,res,query){
 }
 
 localDB.sequelize.sync().then(()=>{
-    moviesFinder.findMovies(localDB);
+    // moviesFinder.findMovies(localDB);
 
-    server.listen(3000,function(){
+    server.listen(3000,"192.168.2.106",function(){
       console.log("corriendo!");
     });
 

@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   let collection = sequelize.define('collection', {
     name:{
       type: DataTypes.STRING,
-      allowNull:false
+      primaryKey:true
     },
     path:{
       type:DataTypes.TEXT,
