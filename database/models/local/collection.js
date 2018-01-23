@@ -1,4 +1,15 @@
 'use strict';
+let fs = require('fs');
+
+var isDirectory=function(path){
+  try{
+    fs.readdirSync(path);
+    return true;
+  } catch(err){
+    return false;
+  }
+}
+
 module.exports = (sequelize, DataTypes) => {
 
   let collection = sequelize.define('collection', {
@@ -17,6 +28,11 @@ module.exports = (sequelize, DataTypes) => {
       validate:{
         notEmpty:{
           msg:"Path cannot be empty"
+        },
+        isPath(path){
+          if (!isDirectory(path)){
+            throw new Error('Not a valid path');
+          }
         }
       }
     },
