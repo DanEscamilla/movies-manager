@@ -39,14 +39,14 @@ app.use('/api/collections/',collectionResource.router);
 app.use('/api/collections/:collectionId/',movieResource.router)
 app.use('/api/genres/',genreResource.router);
 
-movieResource.list.before=function(req,res,query){
+movieResource.list.before=function(req,res,context,next){
   if (req.query.genreId){
     if (!Array.isArray(req.query.genreId)){
       req.query.genreId = [req.query.genreId];
     }
-    query.group=["movie.name"];
-    query.having= localDB.sequelize.literal('COUNT(distinct `genres`.`id`) = '+req.query.genreId.length);
-    query.include.push({
+    context.query.group=["movie.name"];
+    context.query.having= localDB.sequelize.literal('COUNT(distinct `genres`.`id`) = '+req.query.genreId.length);
+    context.query.include.push({
       model:localDB.genre,
       required:true,
       attributes:[],
