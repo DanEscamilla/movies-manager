@@ -20,8 +20,6 @@ app.use(function(req, res, next) {
 
 var server = http.createServer(app);
 
-api.init(app,localDB.sequelize);
-
 var movieResource = api.createResource({
   model: localDB.movie,
   excludeAttributes:['createdAt','updatedAt'],
@@ -60,7 +58,6 @@ movieResource.list.before=function(req,res,query){
 
 localDB.sequelize.sync().then(()=>{
     // moviesFinder.findMovies(localDB);
-
     server.listen(3000,"192.168.2.106",function(){
       console.log("corriendo!");
     });

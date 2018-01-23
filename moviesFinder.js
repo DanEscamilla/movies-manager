@@ -10,7 +10,9 @@ var path = "/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies";
 var name = "Movies";
 
 
-
+module.exports.isDirectory = function(path){
+  return fileFinder.isDirectory(path);
+}
 module.exports.findMovies = function(localDB){
     // imdbLooker.setDB(imdbDB);
     dbInterface.setDB(localDB);

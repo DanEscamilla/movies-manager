@@ -26,12 +26,23 @@ var nameFinder = (function(){
       return arr;
   };
 
+  var isDirectory=function(path){
+    console.log("dafuq");
+    try{
+      fs.readdirSync(path);
+      return true;
+    } catch(err){
+      return false;
+    }
+  }
+
   var isVideo = (name)=>{
     return name.match(/^.*(?=\.(avi|wmv|flv|mpg|mp4|mkv)$)/gi);
   };
 
 	return {
-		find:find
+		find:find,
+    isDirectory:isDirectory
 	};
 
 })();
