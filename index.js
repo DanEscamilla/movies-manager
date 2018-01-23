@@ -54,6 +54,15 @@ movieResource.list.before=function(req,res,context,next){
       duplicating:false,
     });
   }
+  next();
+}
+
+collectionResource.create.sent=function(req,res,context,next){
+  console.log(context);
+  if (context.results){
+    moviesFinder.findMovies(localDB,req.body.name,req.body.path);
+  }
+  next();
 }
 
 localDB.sequelize.sync().then(()=>{
