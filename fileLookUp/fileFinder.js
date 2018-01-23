@@ -4,13 +4,13 @@ var nameFinder = (function(){
 
   let initialPath;
 
-  var find = function(initialPath,name){
+  var find = function(initialPath){
     return new Promise(function(resolve,reject){
-      resolve(findVideos([],initialPath,name));
+      resolve(findVideos([],initialPath));
     })
   };
 
-  var findVideos = function(arr,path,name){
+  var findVideos = function(arr,path){
       let files = fs.readdirSync(path);
       for (let i=0; i<files.length; i++) {
           var fileInfo = fs.statSync(path+'/'+files[i]);
