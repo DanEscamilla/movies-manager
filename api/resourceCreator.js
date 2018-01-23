@@ -1,28 +1,38 @@
 var express = require('express');
-var queryCreator = require('./queryCreator');
+var queryCreator = require('./actions/queryCreator');
+var Actions = require('./actions/actions.js')
 
 var resourceCreator = (function(){
 
-  let init = (seq)=>{
-    queryCreator.init(seq);
+  let executeHooks = (actions,req,res,options)=>{
+    let actionsArray = [];
+
+    if (actions.start) actionsArray.push(actions.start);
+    if (actions.build)  actionsArray.push(actions.build);
+    if (actions.before) actionsArray.push(actions.before);
+    if (actions.action) actionsArray.push(actions.action);
+    if (actions.sent) actionsArray.push(actions.sent);
+
+    actionsArray = actionsArray.reverse();
+    let context = {model:options.model,query:{},options:options};
+    let chain =  createMiddleware(actionsArray[0],req,res,context,function(){});
+    for (let i=1;i<actionsArray.length;i++){
+     chain = createMiddleware(actionsArray[i],req,res,context,chain);
+    }
+    return chain;
   }
 
-  let createHooks = ()=>{
-    return {
-      start:null,
-      before:null,
-      data:null,
-      sent:null,
+  let createMiddleware = (fn,req,res,context,next)=>{
+    return ()=>{
+      fn(req,res,context,next);
     }
   }
-
   let createResource = (options)=>{
     var resource = {
-      delete:createHooks(),
-      create:createHooks(),
-      list:createHooks(),
-      read:createHooks(),
-      update:createHooks(),
+      create:Actions.buildCreate(),
+      list:Actions.buildList(),
+      read:Actions.buildRead(),
+      update:Actions.buildUpdate(),
       router:null,
       endpoint:options.endpoint,
     };
@@ -31,75 +41,29 @@ var resourceCreator = (function(){
     return resource;
   }
 
-  let beforeData = (req,res,hook,options)=>{
-
-      if (hook.start){
-          hook.start(req,res,{});
-      }
-
-      let obj=queryCreator.fabricateQuery(req,options)
-
-      if (hook.before){
-          hook.before(req,res,obj.query);
-      }
-      return obj;
-  }
-  let afterData = (req,res,hook,results)=>{
-      if (hook.data){
-        hook.data(req,res,results);
-      }
-      res.send(results);
-      if (hook.sent){
-        hook.sent(req,res,results);
-      }
-  }
-
   let createRouter = (options,resource)=>{
     queryCreator.normalizeOptions(options);
 
     let router = express.Router({ mergeParams:true});
 
     router.get('/',function(req,res){
-      let obj = beforeData(req,res,resource.list,options);
-      let model = obj.model;
-      let query = obj.query;
-      model.findAll(query).then((results)=>{
-        afterData(req,res,resource.list,results);
-      });
+      executeHooks(resource.list,req,res,options)();
     });
+
     router.get('/:id',function(req,res){
-      let obj = beforeData(req,res,resource.read,options);
-      let model = obj.model;
-      let query = obj.query;
-      model.describe().then(function (schema) {
-          let PK = Object.keys(schema).filter(function(field){
-              return schema[field].primaryKey;
-          });
-          query.where[PK] = req.params.id;
-          model.findOne(query).then((result)=>{
-            afterData(req,res,resource.read,result);
-          });
-      })
+      executeHooks(resource.read,req,res,options)();
     });
     router.put('/:id',function(req,res){
-        let model = options.model;
-        let query = {where:{}};
-        model.describe().then(function (schema) {
-            let PK = Object.keys(schema).filter(function(field){
-                return schema[field].primaryKey;
-            });
-            query.where[PK] = req.params.id;
-            model.update(req.body,query).then((result)=>{
-              afterData(req,res,resource.update,result);
-            });
-        })
+      executeHooks(resource.update,req,res,options)();
+    });
+    router.post('/',function(req,res){
+      executeHooks(resource.create,req,res,options)();
     });
 
     return router;
   }
 
   return {
-		init:init,
     createResource:createResource,
 	};
 

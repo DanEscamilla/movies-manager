@@ -1,10 +1,7 @@
 var path = require('path');
-var resourceCreator = (function(){
-  let sequelize;
 
-  let init = (seq)=>{
-    sequelize = seq;
-  };
+var resourceCreator = (function(){
+
   let buildQSearch = (attributes,value)=>{
     let qCondition= {$or:[]};
     attributes.forEach((attr)=>{
@@ -37,14 +34,14 @@ var resourceCreator = (function(){
     });
   };
 
-  let getOrderingArray = (arrParams)=>{
-    return arrParams.map((param)=>{
-      if (param.charAt(0)=="-"){
-        return [param.substring(1,param.length), 'DESC'];
-      }
-      return [param,'ASC'];
-    });
+  let getAttributesArray = (model)=>{
+    let arr =[];
+    Object.keys(model.rawAttributes).forEach((key)=>{
+      arr.push(key);
+    })
+    return arr;
   };
+  
   let normalizeOptions = (options)=>{
     options.attributes = options.attributes ||getAttributesArray(options.model);
     if (options.excludeAttributes){
@@ -57,6 +54,15 @@ var resourceCreator = (function(){
     }
 
     options.order=((options.order)?getOrderingArray(options.order):undefined);
+  };
+
+  let getOrderingArray = (arrParams)=>{
+    return arrParams.map((param)=>{
+      if (param.charAt(0)=="-"){
+        return [param.substring(1,param.length), 'DESC'];
+      }
+      return [param,'ASC'];
+    });
   };
 
   let makeArray = (variable)=>{
@@ -76,17 +82,12 @@ var resourceCreator = (function(){
     return obj;
   };
 
-  let getAttributesArray = (model)=>{
-    let arr =[];
-    Object.keys(model.rawAttributes).forEach((key)=>{
-      arr.push(key);
-    })
-    return arr;
-  };
   let endpointById = (endpoint)=>{
     return path.normalize(endpoint)+":id"
   };
+
   let fabricateQuery = (req,options)=>{
+
     let query = initQuery(options);
     let page,count,scope,model=options.model;
     Object.keys(req.query).forEach(function(key,index) {
@@ -130,9 +131,8 @@ var resourceCreator = (function(){
   };
 
   return {
-		init:init,
     fabricateQuery:fabricateQuery,
-    normalizeOptions:normalizeOptions
+    normalizeOptions:normalizeOptions,
 	};
 
 })();
