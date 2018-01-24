@@ -14,6 +14,12 @@ function initHooks(){
 function buildUpdate(){
     let hooks = initHooks();
 
+    hooks.build = function(req,res,context,next){
+      let obj = queryCreator.fabricateQuery(req,context.options);
+      context.query = obj.query;
+      context.model = obj.model;
+      next();
+    }
     hooks.action = function(req,res,context,next){
       helpers.getPK(context.model).then((PK)=>{
         context.query.where[PK] = req.params.id;
