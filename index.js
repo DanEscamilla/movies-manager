@@ -58,15 +58,14 @@ movieResource.list.before=function(req,res,context,next){
 }
 
 collectionResource.create.sent=function(req,res,context,next){
-  console.log(context);
   if (context.results){
-    moviesFinder.findMovies(localDB,req.body.name,req.body.path);
+    moviesFinder.findMovies(localDB,context.results);
   }
   next();
 }
 
 localDB.sequelize.sync().then(()=>{
-    // moviesFinder.findMovies(localDB);
+    // moviesFinder.findMovies(localDB,"/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies");
     server.listen(3000,"192.168.2.106",function(){
       console.log("corriendo!");
     });

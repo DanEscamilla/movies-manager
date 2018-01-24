@@ -9,28 +9,15 @@ var imdbDB =  require('./database/models/imdb/index');
 // module.exports.isDirectory = function(path){
 //   return fileFinder.isDirectory(path);
 // }
-module.exports.findMovies = function(localDB,path){
+module.exports.findMovies = function(localDB,collection){
     // imdbLooker.setDB(imdbDB);
     dbInterface.setDB(localDB);
 
-    fileFinder.find(path)
+    fileFinder.find(collection.get().path)
     .then(function(movieFilesInfo){
       movieFilesInfo.forEach((movieFileInfo)=>{
-
-        dbInterface.findMovieInDB(movieFileInfo)
-        .then((movie)=>{
-          console.log("found",movie);
-          return movie;
-        })
-        .catch((err)=>{
-          console.log("fuck");
-          return dbInterface.createMovie(movieFileInfo);
-        })
-        .then((movie)=>{
-          movie.save();
-        })
-      })
-      let promises = [];
+        dbAddMovieToCollection(collection,dbInterface.createMovie(movieFileInfo));
+      });
     })
     .catch((err)=>{
       console.log("wtf");
