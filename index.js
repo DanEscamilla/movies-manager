@@ -35,11 +35,12 @@ var genreResource = api.createResource({
   excludeAttributes:['createdAt','updatedAt']
 });
 
+app.use('/api/collections/:collectionId/movies',movieResource.router)
 app.use('/api/collections/',collectionResource.router);
-app.use('/api/collections/:collectionId/',movieResource.router)
 app.use('/api/genres/',genreResource.router);
 
 movieResource.list.before=function(req,res,context,next){
+  context.query.where['$and'].push({collectionName: req.params.collectionId});
   if (req.query.genreId){
     if (!Array.isArray(req.query.genreId)){
       req.query.genreId = [req.query.genreId];
@@ -54,6 +55,7 @@ movieResource.list.before=function(req,res,context,next){
       duplicating:false,
     });
   }
+  console.log(context.query.where);
   next();
 }
 
@@ -71,5 +73,4 @@ localDB.sequelize.sync().then(()=>{
     server.listen(3000,"192.168.2.106",function(){
       console.log("corriendo!");
     });
-
 });
