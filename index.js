@@ -64,6 +64,8 @@ collectionResource.create.sent=function(req,res,context,next){
   next();
 }
 
+console.log(localDB.collection.addMovie);
+
 localDB.sequelize.sync().then(()=>{
     // moviesFinder.findMovies(localDB,"/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies");
     server.listen(3000,"192.168.2.106",function(){
