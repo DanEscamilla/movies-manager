@@ -36,6 +36,7 @@ var genreResource = api.createResource({
 });
 
 app.use('/api/collections/:collectionId/movies',movieResource.router)
+app.use('/api/movies/',movieResource.router)
 app.use('/api/collections/',collectionResource.router);
 app.use('/api/genres/',genreResource.router);
 
