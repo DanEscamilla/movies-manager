@@ -41,7 +41,7 @@ var resourceCreator = (function(){
     })
     return arr;
   };
-  
+
   let normalizeOptions = (options)=>{
     options.attributes = options.attributes ||getAttributesArray(options.model);
     if (options.excludeAttributes){
@@ -122,7 +122,7 @@ var resourceCreator = (function(){
     if (page!=null){
       count = count||50;
       query.offset = page*count;
-      query.limit = (page+1)*count;
+      query.limit = count;
     }
     if (scope){
       model = model.scope(scope);
