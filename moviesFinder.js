@@ -16,7 +16,7 @@ module.exports.findMovies = function(localDB,collection){
     fileFinder.find(collection.get().path)
     .then(function(movieFilesInfo){
       movieFilesInfo.forEach((movieFileInfo)=>{
-        dbAddMovieToCollection(collection,dbInterface.createMovie(movieFileInfo));
+        dbInterface.addMovieToCollection(collection,dbInterface.createMovie(movieFileInfo));
       });
     })
     .catch((err)=>{
