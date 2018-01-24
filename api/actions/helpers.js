@@ -5,7 +5,7 @@ module.exports = {
         let PK = Object.keys(schema).filter(function(field){
             return schema[field].primaryKey;
         });
-        return PK;
+        return PK[0];
     })
   }
 }
