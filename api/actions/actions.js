@@ -28,6 +28,7 @@ function buildUpdate(){
         });
       })
     }
+
     return hooks;
 }
 
@@ -45,7 +46,11 @@ function buildRead(){
         context.query.where[PK] = req.params.id;
         context.model.findOne(context.query).then((result)=>{
           context.result = result;
-          res.send(result);
+          if (result.data===""){
+            res.status(404).send({message:"Not found"});
+          } else {
+            res.send(result);
+          }
           next();
         }).catch((err)=>{
           context.error = err;
