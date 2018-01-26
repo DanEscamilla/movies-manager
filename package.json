@@ -20,6 +20,7 @@
     "string-similarity": "^1.2.0"
   },
   "devDependencies": {
+    "nodemon": "^1.14.11",
     "webpack-hot-middleware": "^2.21.0"
   }
 }
