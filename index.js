@@ -10,14 +10,16 @@ var moviesFinder = require('./moviesFinder');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use('/public',express.static("/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies/"));
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "POST,GET,PUT");
   next();
 });
-
+app.use((req,res,next)=>{
+  console.log(req.url);
+  next();
+})
 var server = http.createServer(app);
 
 var movieResource = api.createResource({
@@ -34,6 +36,17 @@ var genreResource = api.createResource({
   model: localDB.genre,
   excludeAttributes:['createdAt','updatedAt']
 });
+
+localDB.collection.findAll().then(collections=>{
+  collections.forEach(collection=>{
+    let collectionInfo = collection.get();
+    console.log(collectionInfo.path);
+    app.use('/'+collectionInfo.name,express.static(collectionInfo.path));
+  })
+})
+.catch(err=>{
+  console.log(err);
+})
 
 app.use('/api/collections/:collectionId/movies',movieResource.router)
 app.use('/api/movies/',movieResource.router)
@@ -62,6 +75,8 @@ movieResource.list.before=function(req,res,context,next){
 
 collectionResource.create.sent=function(req,res,context,next){
   if (context.results){
+    console.log(context.results.path);
+    app.use('/'+context.results.name,express.static(context.results.path));
     moviesFinder.findMovies(localDB,context.results);
   }
   next();
@@ -71,7 +86,7 @@ console.log(localDB.collection.addMovie);
 
 localDB.sequelize.sync().then(()=>{
     // moviesFinder.findMovies(localDB,"/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies");
-    server.listen(3000,"192.168.2.106",function(){
+    server.listen(3000,function(){
       console.log("corriendo!");
     });
 });
