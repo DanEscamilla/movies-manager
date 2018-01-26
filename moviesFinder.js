@@ -1,5 +1,5 @@
 const fileFinder = require("./fileLookUp/fileFinder");
-const imdbLooker = require("./fileLookUp/imdbLooker");
+// const imdbLooker = require("./fileLookUp/imdbLooker");
 const dbInterface = require("./fileLookUp/dbInterface");
 const posterDownloader = require("./fileLookUp/posterDownloader");
 const parseTorrentName = require("parse-torrent-name");

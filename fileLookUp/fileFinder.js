@@ -1,25 +1,27 @@
-var fs = require('fs')
+var Fs = require('fs');
+var Path = require('path');
 
 var nameFinder = (function(){
 
   let initialPath;
 
-  var find = function(initialPath){
+  var find = function(path){
     return new Promise(function(resolve,reject){
+      initialPath = path;
       resolve(findVideos([],initialPath));
     })
   };
 
   var findVideos = function(arr,path){
-      let files = fs.readdirSync(path);
+      let files = Fs.readdirSync(path);
       for (let i=0; i<files.length; i++) {
-          var fileInfo = fs.statSync(path+'/'+files[i]);
+          var fileInfo = Fs.statSync(path+'/'+files[i]);
           if (fileInfo.isDirectory()){
             var dir = findVideos(arr,path+'/'+files[i],files[i]);
           } else {
             let video = isVideo(files[i]);
             if (video){
-              arr.push({name:video[0],path:path,filename:files[i]});
+              arr.push({name:video[0],path:Path.relative(initialPath,path),filename:files[i]});
             }
           }
       }
@@ -29,7 +31,7 @@ var nameFinder = (function(){
   var isDirectory=function(path){
     console.log("dafuq");
     try{
-      fs.readdirSync(path);
+      Fs.readdirSync(path);
       return true;
     } catch(err){
       return false;
