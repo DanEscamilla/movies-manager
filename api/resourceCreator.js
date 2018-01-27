@@ -33,6 +33,7 @@ var resourceCreator = (function(){
       list:Actions.buildList(),
       read:Actions.buildRead(),
       update:Actions.buildUpdate(),
+      delete:Actions.buildDelete(),
       router:null,
       endpoint:options.endpoint,
     };
@@ -59,6 +60,10 @@ var resourceCreator = (function(){
     router.post('/',function(req,res){
       executeHooks(resource.create,req,res,options)();
     });
+    router.delete('/:id',function(req,res){
+      executeHooks(resource.delete,req,res,options)();
+    });
+
 
     return router;
   }

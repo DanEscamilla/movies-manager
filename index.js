@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "POST,GET,PUT");
+  res.header("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE");
   next();
 });
 app.use((req,res,next)=>{
@@ -48,8 +48,8 @@ localDB.collection.findAll().then(collections=>{
   console.log(err);
 })
 
-app.use('/api/collections/:collectionId/movies',movieResource.router)
-app.use('/api/movies/',movieResource.router)
+app.use('/api/collections/:collectionId/movies',movieResource.router);
+app.use('/api/movies/',movieResource.router);
 app.use('/api/collections/',collectionResource.router);
 app.use('/api/genres/',genreResource.router);
 
