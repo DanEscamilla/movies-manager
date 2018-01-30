@@ -7,7 +7,15 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false
     },
     duration:DataTypes.INTEGER,
-    year:DataTypes.INTEGER,
+    year:{
+      type:DataTypes.INTEGER,
+      validate:{
+        isInt:{
+          args:true,
+          msg:"Must be Integer"
+        }
+      }
+    },
     status:{
       type:DataTypes.ENUM('IN-PROGRESS','NEW','FINISHED','UNSEEN'),
       defaultValue:'NEW'
@@ -16,7 +24,15 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.TEXT,
       allowNull:false
     },
-    rating:DataTypes.FLOAT,
+    rating:{
+      type:DataTypes.FLOAT,
+      validate:{
+        isFloat:{
+          args:true,
+          msg:"Must be a Float"
+        }
+      }
+    },
     imdbId:DataTypes.STRING,
     filename:DataTypes.STRING,
     lastPlayTime:{
