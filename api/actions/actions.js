@@ -25,7 +25,11 @@ function buildUpdate(){
         context.query.where[PK] = req.params.id;
         context.model.update(req.body,context.query).then((result)=>{
           context.results = result;
-          res.send(result);
+          if (result==0){
+            res.status(404).send({message:"Not found"});
+          } else {
+            res.send({rowsModified:result});
+          }
           next();
         }).catch((err)=>{
           context.error = err;
