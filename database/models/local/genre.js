@@ -5,7 +5,8 @@ module.exports = (sequelize, DataTypes) => {
   let genre = sequelize.define('genre', {
     name:{
       type:DataTypes.STRING,
-      allowNull:false
+      allowNull:false,
+      unique:true
     }
   });
   genre.associate= function(models) {
