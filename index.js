@@ -44,11 +44,27 @@ localDB.collection.findAll().then(collections=>{
   console.log(err);
 })
 
+app.post('/api/movieGenre/:movieId/',function(req,res){
+
+  console.log(req.body);
+      localDB.movie.findOne({where:{id:req.params.movieId}})
+      .then(movie=>{
+        insertGenres(req.body,movie).then(done=>{
+          movie.getGenres().then(res=>{
+            console.log(res.map(genre=>genre.dataValues));
+          })
+          res.sendStatus(200);
+        });
+      })
+      .catch(err=>{
+        console.log(err);
+        res.sendStatus(400);
+      })
+})
 app.use('/api/collections/:collectionId/movies',movieResource.router);
 app.use('/api/movies/',movieResource.router);
 app.use('/api/collections/',collectionResource.router);
 app.use('/api/genres/',genreResource.router);
-// app.post('/api/movies/:movieId/',)
 
 movieResource.list.before=function(req,res,context,next){
   context.query.where['$and'].push({collectionName: req.params.collectionId});
@@ -82,15 +98,6 @@ collectionResource.create.sent=function(req,res,context,next){
 console.log(localDB.collection.addMovie);
 
 localDB.sequelize.sync().then(()=>{
-    let arr = [{name:"test1"},{name:"test2"},{name:"test3"},{name:"test4"}]
-
-    localDB.movie.findOne({where:{id:1}})
-    .then(movie=>{
-      insertGenres(arr,movie);
-    })
-    .catch(err=>{
-      // console.log(err);
-    })
     // moviesFinder.findMovies(localDB,"/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies");
     server.listen(3000,function(){
       console.log("corriendo!");
