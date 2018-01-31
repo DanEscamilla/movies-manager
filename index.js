@@ -16,10 +16,6 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE");
   next();
 });
-app.use((req,res,next)=>{
-  console.log(req.url);
-  next();
-})
 var server = http.createServer(app);
 
 var movieResource = api.createResource({
@@ -52,6 +48,7 @@ app.use('/api/collections/:collectionId/movies',movieResource.router);
 app.use('/api/movies/',movieResource.router);
 app.use('/api/collections/',collectionResource.router);
 app.use('/api/genres/',genreResource.router);
+// app.post('/api/movies/:movieId/',)
 
 movieResource.list.before=function(req,res,context,next){
   context.query.where['$and'].push({collectionName: req.params.collectionId});
@@ -85,8 +82,26 @@ collectionResource.create.sent=function(req,res,context,next){
 console.log(localDB.collection.addMovie);
 
 localDB.sequelize.sync().then(()=>{
+    let arr = [{name:"test1"},{name:"test2"},{name:"test3"},{name:"test4"}]
+
+    localDB.movie.findOne({where:{id:1}})
+    .then(movie=>{
+      insertGenres(arr,movie);
+    })
+    .catch(err=>{
+      // console.log(err);
+    })
     // moviesFinder.findMovies(localDB,"/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies");
     server.listen(3000,function(){
       console.log("corriendo!");
     });
 });
+
+async function insertGenres(genres,movie){
+  for (let genre of genres){
+    await localDB.genre.findOrCreate({where:{name:genre.name}})
+          .then(genre=>{
+            return movie.addGenres(genre[0])
+          })
+  }
+}
