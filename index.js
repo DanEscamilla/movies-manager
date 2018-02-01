@@ -7,6 +7,7 @@ var http = require('http');
 var app = express();
 var bodyParser = require('body-parser');
 var moviesFinder = require('./moviesFinder');
+var createCustomRoutes = require('./customRoutes/CustomRoutes');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -44,27 +45,11 @@ localDB.collection.findAll().then(collections=>{
   console.log(err);
 })
 
-app.post('/api/movieGenre/:movieId/',function(req,res){
-
-  console.log(req.body);
-      localDB.movie.findOne({where:{id:req.params.movieId}})
-      .then(movie=>{
-        insertGenres(req.body,movie).then(done=>{
-          movie.getGenres().then(res=>{
-            console.log(res.map(genre=>genre.dataValues));
-          })
-          res.sendStatus(200);
-        });
-      })
-      .catch(err=>{
-        console.log(err);
-        res.sendStatus(400);
-      })
-})
 app.use('/api/collections/:collectionId/movies',movieResource.router);
 app.use('/api/movies/',movieResource.router);
 app.use('/api/collections/',collectionResource.router);
 app.use('/api/genres/',genreResource.router);
+app.use('/',createCustomRoutes(localDB));
 
 movieResource.list.before=function(req,res,context,next){
   context.query.where['$and'].push({collectionName: req.params.collectionId});
@@ -103,12 +88,3 @@ localDB.sequelize.sync().then(()=>{
       console.log("corriendo!");
     });
 });
-
-async function insertGenres(genres,movie){
-  for (let genre of genres){
-    await localDB.genre.findOrCreate({where:{name:genre.name}})
-          .then(genre=>{
-            return movie.addGenres(genre[0])
-          })
-  }
-}
