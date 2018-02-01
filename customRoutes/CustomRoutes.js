@@ -10,10 +10,14 @@ function createCustomRoutes(localDB){
     .then(movie=>{
       createGenres(req.body,localDB)
       .then(genres=>{
-        console.log(genres[0]);
-        console.log(genres.map(genre=>{return genre.dataValues}));
-        movie.setGenres(genres.map(genre=>{return genre.dataValues}));
-        res.sendStatus(200);
+        movie.setGenres(genres)
+        .then(done=>{
+          res.sendStatus(200);
+        })
+        .catch((err)=>{
+          console.log(err);
+          res.sendStatus(400);
+        });
       })
     })
     .catch(err=>{
@@ -35,8 +39,9 @@ async function insertGenres(genres,movie,localDB){
 async function createGenres(genres,localDB){
   let genreInstances = [];
   for (let genre of genres){
-    genreInstances.push(await localDB.genre.findOrCreate({where:{name:genre.name}}));
+    genreInstances.push(await localDB.genre.findOrCreate({where:{name:genre.name}}).then(genre=>genre[0]));
   }
   return genreInstances;
 }
+
 module.exports = createCustomRoutes;
