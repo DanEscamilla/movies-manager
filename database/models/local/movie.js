@@ -48,6 +48,13 @@ module.exports = (sequelize, DataTypes) => {
     movie.belongsToMany(models.genre,{
       through:'movie_genre'
     });
+
+    movie.addScope('withGenres',{
+      include:[{
+        model:models.genre,
+      }]
+    });
+
   };
   return movie;
 };
