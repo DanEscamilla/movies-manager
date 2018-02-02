@@ -1,7 +1,7 @@
 var express = require('express');
 
 
-function createCustomRoutes(localDB){
+function createCustomRoutesRouter(localDB){
 
   const router = express.Router({ mergeParams:true});
 
@@ -44,4 +44,4 @@ async function createGenres(genres,localDB){
   return genreInstances;
 }
 
-module.exports = createCustomRoutes;
+module.exports = createCustomRoutesRouter;

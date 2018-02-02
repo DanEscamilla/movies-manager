@@ -1,90 +1,27 @@
-var express = require('express');
-var indexFile = "/home/mazin0/NodeProjects/movies-app-front/public/index.html";
-var path = require('path');
-let api = require('./api/api');
-var localDB = require('./database/models/local/index');
-var http = require('http');
-var app = express();
-var bodyParser = require('body-parser');
-var moviesFinder = require('./moviesFinder');
-var createCustomRoutes = require('./customRoutes/CustomRoutes');
+let express = require('express');
+let localDB = require('./database/models/local/index');
+let loadMiddleware = require('./server/loadMiddleware');
+let loadResourcesMiddleware = require('./server/loadResourcesMiddleware');
+let createResources = require('./server/createResources');
+let createStaticServers = require('./server/createStaticServers');
+let createCustomRoutesRouter = require('./server/createCustomRoutesRouter');
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE");
-  next();
-});
-var server = http.createServer(app);
+let app = express();
+let resources = createResources(localDB);
+let customRoutesRouter = createCustomRoutesRouter(localDB);
 
-var movieResource = api.createResource({
-  model: localDB.movie,
-  excludeAttributes:['createdAt','updatedAt'],
-  order:['-updatedAt'],
-});
-var collectionResource = api.createResource({
-  model: localDB.collection,
-  excludeAttributes:['createdAt','updatedAt'],
-  order:['-updatedAt'],
-});
-var genreResource = api.createResource({
-  model: localDB.genre,
-  excludeAttributes:['createdAt','updatedAt']
-});
+loadMiddleware(app);
+createStaticServers(localDB,app);
+loadResourcesMiddleware(resources);
 
-localDB.collection.findAll().then(collections=>{
-  collections.forEach(collection=>{
-    let collectionInfo = collection.get();
-    console.log(collectionInfo.path);
-    app.use('/'+collectionInfo.name,express.static(collectionInfo.path));
-  })
-})
-.catch(err=>{
-  console.log(err);
-})
+app.use('/api/movies/',resources.movie.router);
+app.use('/api/collections/',resources.collection.router);
+app.use('/api/genres/',resources.genre.router);
+app.use('/',customRoutesRouter);
 
-app.use('/api/collections/:collectionId/movies',movieResource.router);
-app.use('/api/movies/',movieResource.router);
-app.use('/api/collections/',collectionResource.router);
-app.use('/api/genres/',genreResource.router);
-app.use('/',createCustomRoutes(localDB));
-
-movieResource.list.before=function(req,res,context,next){
-  context.query.where['$and'].push({collectionName: req.params.collectionId});
-  if (req.query.genreId){
-    if (!Array.isArray(req.query.genreId)){
-      req.query.genreId = [req.query.genreId];
-    }
-    context.query.group=["movie.name"];
-    context.query.having= localDB.sequelize.literal('COUNT(distinct `genres`.`id`) = '+req.query.genreId.length);
-    context.query.include.push({
-      model:localDB.genre,
-      required:true,
-      attributes:[],
-      where:{id:req.query.genreId},
-      duplicating:false,
-    });
-  }
-  console.log(context.query.where);
-  next();
-}
-
-collectionResource.create.sent=function(req,res,context,next){
-  if (context.results){
-    console.log(context.results.path);
-    app.use('/'+context.results.name,express.static(context.results.path));
-    moviesFinder.findMovies(localDB,context.results);
-  }
-  next();
-}
-
-console.log(localDB.collection.addMovie);
 
 localDB.sequelize.sync().then(()=>{
-    // moviesFinder.findMovies(localDB,"/media/mazin0/E034C99434C96E5A/uTorrentDownloads/Movies");
-    server.listen(3000,function(){
+    app.listen(3000,function(){
       console.log("corriendo!");
     });
 });
