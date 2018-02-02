@@ -1,10 +1,10 @@
-const fileFinder = require("./fileLookUp/fileFinder");
-// const imdbLooker = require("./fileLookUp/imdbLooker");
-const dbInterface = require("./fileLookUp/dbInterface");
-const posterDownloader = require("./fileLookUp/posterDownloader");
+const fileFinder = require("./fileFinder");
+// const imdbLooker = require("./imdbLooker");
+const dbInterface = require("./dbInterface");
+const posterDownloader = require("./posterDownloader");
 const parseTorrentName = require("parse-torrent-name");
 
-var imdbDB =  require('./database/models/imdb/index');
+// var imdbDB =  require('../database/models/imdb/index');
 
 // module.exports.isDirectory = function(path){
 //   return fileFinder.isDirectory(path);

@@ -1,4 +1,7 @@
-function loadResourcesMiddleware(resources){
+let express = require('express');
+let moviesFinder = require('../fileLookUp/moviesFinder')
+
+function loadResourcesMiddleware(resources,localDB,app){
 
   resources.movie.list.before=function(req,res,context,next){
     context.query.where['$and'].push({collectionName: req.params.collectionId});

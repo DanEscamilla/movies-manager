@@ -12,10 +12,11 @@ let customRoutesRouter = createCustomRoutesRouter(localDB);
 
 loadMiddleware(app);
 createStaticServers(localDB,app);
-loadResourcesMiddleware(resources);
+loadResourcesMiddleware(resources,localDB,app);
 
-app.use('/api/movies/',resources.movie.router);
+app.use('/api/collections/:collectionId/movies/',resources.movie.router);
 app.use('/api/collections/',resources.collection.router);
+app.use('/api/movies/',resources.movie.router);
 app.use('/api/genres/',resources.genre.router);
 app.use('/',customRoutesRouter);
 
