@@ -9,9 +9,18 @@ function initHooks(){
     context.model = obj.model;
     next();
   }
+  let parent = function(req,res,context,next){
+    context.parentContext = {
+      options:context.parentResource.options,
+      query:queryCreator.fabricateEmptyQuery(),
+      model:context.parentResource.options.model,
+    };
 
+    context.parentResource.read.data(req,res,context.parentContext,next);
+  }
   return {
     start:null,
+    parent:parent,
     build:build,
     before:null,
     data:null,
@@ -20,30 +29,33 @@ function initHooks(){
   }
 }
 
-function buildUpdate(){
+function buildSet(){
     let hooks = initHooks();
+    hooks.build = null;
 
     hooks.data = function(req,res,context,next){
-      context.query.where[context.options.primaryKey] = req.params[context.options.paramName];
-      context.model.update(req.body,context.query).then((result)=>{
+      helpers.findOrCreate(req.body,context.options)
+      .then(instances=>{
+        return context.parentContext.result[helpers.buildFunctionName('set',context.options.model.name,true)](instances)
+      })
+      .then(result=>{
         context.result = result;
         next();
-      }).catch((err)=>{
+      })
+      .catch(err=>{
         context.error = err;
         next();
-      });
+      })
     }
+
     hooks.action = function(req,res,context,next){
-      if (context.result==0){
-        res.status(404).send({message:"Not found"});
-      } else if (context.result){
-        res.send({rowsModified:context.result});
+      if (context.result){
+        res.send(context.result);
       } else {
         res.status(400).send(context.error);
       }
       next();
     }
-
     return hooks;
 }
 function buildDelete(){
@@ -81,18 +93,15 @@ function buildRead(){
         context.result = result;
         next();
       }).catch((err)=>{
-        console.log(err);
         context.error = err;
         next();
       });
     }
     hooks.action = function(req,res,context,next){
-      if (context.result){
-        if (context.result.data===""){
-          res.status(400).send({message:"Not found"});
-        } else {
-          res.send(context.result);
-        }
+      if (context.result.data===""){
+        res.status(404).send({message:"Not found"});
+      } else if (context.result){
+        res.send(context.result);
       } else {
         res.status(400).send(context.error);
       }
@@ -131,14 +140,20 @@ function buildList(){
     let hooks = initHooks();
 
     hooks.data = function(req,res,context,next){
-      context.model.findAll(context.query).then((results)=>{
-        context.results = results;
+      if (context.parentContext.result){
+        context.parentContext.result[helpers.buildFunctionName('get',context.options.model.name,true)](context.query).then((results)=>{
+          context.results = results;
+          next();
+        }).catch((err)=>{
+          context.error = err;
+          next();
+        });
+      } else {
+        context.error = context.parentContext.error;
         next();
-      }).catch((err)=>{
-        context.error = err;
-        next();
-      });
+      }
     }
+
     hooks.action = function(req,res,context,next){
       if (context.results){
         res.send(context.results);
@@ -150,10 +165,11 @@ function buildList(){
     return hooks;
 }
 
+
 module.exports={
   buildList:buildList,
   buildCreate:buildCreate,
-  buildUpdate:buildUpdate,
+  buildSet:buildSet,
   buildRead:buildRead,
   buildDelete:buildDelete,
 };

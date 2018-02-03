@@ -1,6 +1,7 @@
-var path = require('path');
+let path = require('path');
+let helpers = require('./helpers');
 
-var resourceCreator = (function(){
+let resourceCreator = (function(){
 
   let buildQSearch = (attributes,value)=>{
     let qCondition= {$or:[]};
@@ -43,17 +44,23 @@ var resourceCreator = (function(){
   };
 
   let normalizeOptions = (options)=>{
-    options.attributes = options.attributes ||getAttributesArray(options.model);
-    if (options.excludeAttributes){
-      options.excludeAttributes.forEach((attr)=>{
-        let index = options.attributes.indexOf(attr)
+    let newOptions={...options};
+    newOptions.attributes = newOptions.attributes || getAttributesArray(newOptions.model);
+    if (newOptions.excludeAttributes){
+      newOptions.excludeAttributes.forEach((attr)=>{
+        let index = newOptions.attributes.indexOf(attr)
         if (index>=0){
-          options.attributes.splice(index,1);
+          newOptions.attributes.splice(index,1);
         }
       })
     }
-
-    options.order=((options.order)?getOrderingArray(options.order):undefined);
+    helpers.getPK(newOptions.model)
+    .then(PK=>{
+      newOptions.primaryKey = PK;
+    })
+    newOptions.paramName = newOptions.model.name+"Id";
+    newOptions.order=((newOptions.order)?getOrderingArray(newOptions.order):undefined);
+    return newOptions;
   };
 
   let getOrderingArray = (arrParams)=>{
@@ -130,8 +137,15 @@ var resourceCreator = (function(){
     return {query:query,model:model};
   };
 
+  let fabricateEmptyQuery = ()=>{
+    return {
+      where:{}
+    };
+  }
+
   return {
     fabricateQuery:fabricateQuery,
+    fabricateEmptyQuery:fabricateEmptyQuery,
     normalizeOptions:normalizeOptions,
 	};
 
