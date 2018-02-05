@@ -1,4 +1,7 @@
 /node_modules
 /dist
 /npm-debug.log
-/database/my-movies-db.db
+database/my-movies-db.db
+# ignore vim files
+*.swp
+*.swo
