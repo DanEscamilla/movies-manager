@@ -4,7 +4,7 @@ function createStaticServers(localDB,app){
   localDB.collection.findAll().then(collections=>{
     collections.forEach(collection=>{
       let collectionInfo = collection.get();
-      app.use('/'+collectionInfo.name,express.static(collectionInfo.path));
+      app.use('/'+collectionInfo.id,express.static(collectionInfo.path));
     })
   })
   .catch(err=>{

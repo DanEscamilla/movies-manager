@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
   let collection = sequelize.define('collection', {
     name:{
       type: DataTypes.STRING,
-      primaryKey:true,
+      allowNull:false,
+      unique:true,
       validate:{
         notEmpty:{
           msg:"Name cannot be empty"
