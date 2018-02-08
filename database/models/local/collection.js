@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   collection.associate = function(models) {
-    collection.hasMany(models.movie);
+    collection.hasMany(models.movie,{onDelete: 'CASCADE'});
   };
   return collection;
 };
