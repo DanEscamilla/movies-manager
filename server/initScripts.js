@@ -5,13 +5,13 @@ function initScripts(localDB){
 
   let query={
     where:{
-      status:"NEW",
+      status:"2-NEW",
       createdAt:{
         [Op.lt]: moment().subtract({'days':3}).toDate(),
       }
     }
   }
-  localDB.movie.update({status:'UNSEEN'},query);
+  localDB.movie.update({status:'3-UNSEEN'},query);
 
 }
 

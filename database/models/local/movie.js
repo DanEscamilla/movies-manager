@@ -17,8 +17,8 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     status:{
-      type:DataTypes.ENUM('IN-PROGRESS','NEW','UNSEEN','FINISHED'),
-      defaultValue:'NEW'
+      type:DataTypes.ENUM('1-PROGRESS','2-NEW','3-UNSEEN','4-FINISHED'),
+      defaultValue:'2-NEW'
     },
     path:{
       type:DataTypes.TEXT,
