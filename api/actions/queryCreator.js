@@ -26,7 +26,7 @@ let resourceCreator = (function(){
 
   let appendSearchOption = (where,options,value)=>{
     let attributes = options.attributes||[];
-    let operator = options.operator||'$eq';
+    let operator = options.operator|| (Array.isArray(value))?'$in':'$eq';
     attributes.forEach((attr)=>{
       let obj = {}
       obj[attr]={}
