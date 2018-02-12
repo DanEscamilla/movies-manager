@@ -8,6 +8,10 @@ function createResources(localDB){
     excludeAttributes:['createdAt','updatedAt'],
     order:['status','-lastSeenDate','name'],
     endpoint:'/api/movies/',
+    search: [{
+      param: 'movieId',
+      attributes: [ 'id' ]
+    }],
   });
   resources.collection = api.createResource({
     model: localDB.collection,
