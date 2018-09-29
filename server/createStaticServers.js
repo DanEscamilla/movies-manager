@@ -1,10 +1,10 @@
 let express = require('express');
 
-function createStaticServers(localDB,app){
+function createStaticServers(localDB,router){
   return localDB.collection.findAll().then(collections=>{
     collections.forEach(collection=>{
       let collectionInfo = collection.get();
-      app.use('/'+collectionInfo.id,express.static(collectionInfo.path));
+      router.use('/'+collectionInfo.id,express.static(collectionInfo.path));
     })
   })
   .catch(err=>{

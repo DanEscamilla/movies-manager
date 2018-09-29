@@ -14,26 +14,27 @@ let app = express();
 localDB.sequelize.sync().then(()=>{
 
   let resources = createResources(localDB);
+  let staticFilesRouter = express.Router({ mergeParams:true});
 
   loadMiddleware(app);
-  loadResourcesMiddleware(resources,localDB,app);
+  loadResourcesMiddleware(resources,localDB,staticFilesRouter);
   // app.use(function(req,res,next){
   //   console.log(req.url);
   //   console.log(req.query);
   //   next();
   // })
 
+
   app.use(resources.collection.endpoint,resources.collection.router);
   app.use(resources.movie.endpoint,resources.movie.router);
   app.use(resources.genre.endpoint,resources.genre.router);
   app.use(customEndpoints(localDB));
 
-  app.use('/',express.static('public'))
+  staticFilesRouter.use('/',express.static('public'));
 
-
-
-  createStaticServers(localDB,app)
+  createStaticServers(localDB,staticFilesRouter)
   .then(()=>{
+    app.use('/',staticFilesRouter);
     app.get('/*', function (req, res) {
       res.sendFile(path.resolve(__dirname + '/public/index.html'))
     })
