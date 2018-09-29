@@ -13,6 +13,7 @@
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.2",
     "mysql2": "^1.5.1",
+    "opn": "^5.4.0",
     "parse-torrent-name": "^0.5.4",
     "request": "^2.83.0",
     "sequelize": "^4.31.2",

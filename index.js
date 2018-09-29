@@ -7,6 +7,7 @@ let customEndpoints = require('./server/customEndpoints');
 let createStaticServers = require('./server/createStaticServers');
 let initScripts = require('./server/initScripts');
 let path = require('path');
+let opn = require('opn');
 
 let app = express();
 
@@ -41,7 +42,10 @@ localDB.sequelize.sync().then(()=>{
   initScripts(localDB);
 
   app.listen(3000,function(){
+    console.log('Opening...')
+    opn('http://localhost:3000/',()=>{
       console.log("open!");
     });
+  });
 
 });
