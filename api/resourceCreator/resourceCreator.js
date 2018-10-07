@@ -26,11 +26,11 @@ var resourceCreator = (function(){
 
   let createResource = (options)=>{
     var resource = {
-      create:Actions.buildCreate(),
-      list:Actions.buildList(),
-      read:Actions.buildRead(),
-      update:Actions.buildUpdate(),
-      delete:Actions.buildDelete(),
+      create:(options.create === false) ? false : Actions.buildCreate(),
+      list:(options.list === false) ? false : Actions.buildList(),
+      read:(options.read === false) ? false : Actions.buildRead(),
+      update:(options.update === false) ? false : Actions.buildUpdate(),
+      delete:(options.delete === false) ? false : Actions.buildDelete(),
       router:null,
       endpoint:options.endpoint,
       options:queryCreator.normalizeOptions(options),
@@ -44,22 +44,35 @@ var resourceCreator = (function(){
 
     let router = express.Router({ mergeParams:true});
 
-    router.get('/',function(req,res){
-      executeHooks(resource.list,req,res,resource.options)();
-    });
+    if (resource.list){
+      router.get('/',function(req,res){
+        executeHooks(resource.list,req,res,resource.options)();
+      });
+    }
 
-    router.get('/:'+resource.options.paramName,function(req,res){
-      executeHooks(resource.read,req,res,resource.options)();
-    });
-    router.put('/:'+resource.options.paramName,function(req,res){
-      executeHooks(resource.update,req,res,resource.options)();
-    });
-    router.post('/',function(req,res){
-      executeHooks(resource.create,req,res,resource.options)();
-    });
-    router.delete('/:'+resource.options.paramName,function(req,res){
-      executeHooks(resource.delete,req,res,resource.options)();
-    });
+    if (resource.read){
+      router.get('/:'+resource.options.paramName,function(req,res){
+        executeHooks(resource.read,req,res,resource.options)();
+      });
+    }
+
+    if (resource.update){
+      router.put('/:'+resource.options.paramName,function(req,res){
+        executeHooks(resource.update,req,res,resource.options)();
+      });
+    }
+
+    if (resource.create){
+      router.post('/',function(req,res){
+        executeHooks(resource.create,req,res,resource.options)();
+      });
+    }
+
+    if (resource.delete){
+      router.delete('/:'+resource.options.paramName,function(req,res){
+        executeHooks(resource.delete,req,res,resource.options)();
+      });
+    }
 
     return router;
   }
