@@ -39,7 +39,9 @@ var nameFinder = (function(){
   }
 
   var isVideo = (name)=>{
-    return name.match(/^.*(?=\.(avi|wmv|flv|mpg|mp4|mkv)$)/gi);
+    // const videoFormatsRegex = /^.*(?=\.(webm|ogg|avi|wmv|flv|mpg|mp4|mkv)$)/gi;
+    const supportedVideoFormatsRegex = /^.*(?=\.(ogg|webm|mp4)$)/gi
+    return name.match(supportedVideoFormatsRegex);
   };
 
 	return {
