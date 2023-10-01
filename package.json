@@ -4,7 +4,7 @@
   "description": "movies app back-end",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Daniel Carbajal",
@@ -17,11 +17,7 @@
     "parse-torrent-name": "^0.5.4",
     "request": "^2.83.0",
     "sequelize": "^4.31.2",
-    "sqlite3": "^3.1.13",
+    "sqlite3": "^5.1.6",
     "string-similarity": "^1.2.0"
-  },
-  "devDependencies": {
-    "nodemon": "^1.14.11",
-    "webpack-hot-middleware": "^2.21.0"
   }
 }
